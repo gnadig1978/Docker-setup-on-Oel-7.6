@@ -1,0 +1,257 @@
+How to setup a 3 node swarm cluster in OEL 7.6  with Kernel 3.10.0-957.el7.x86_64
+
+1.0) Install Oel 7.2 
+2.0) Ensure your having having a valid repo configured in /etc/yum.repo/
+2.1) yum update -y, Once the latest Kernel is updated reboot the node. 
+2.2) yum install docker -y ========================> Install docker on all the 3 nodes
+3.0) If your behind the proxy you can configure the proxy @ /etc/systemd/system/docker.service.d/
+3.1) Create a systemd drop-in directory for the docker service:
+
+$ mkdir -p /etc/systemd/system/docker.service.d
+
+Create a file called /etc/systemd/system/docker.service.d/http-proxy.conf that adds the HTTP_PROXY and HTTPS_PROXY  environment variable:
+
+[Service]
+Environment="HTTP_PROXY=http://x.x.x.x:80/" HTTPS_PROXY=http://x.x.s.x:80/"
+
+4.0) systemctl enable docker 
+5.0) systemctl start docker  
+6.0) Flush changes.
+7.0) systemctl daemon-reload
+7.1) systemctl show --property Environment docker
+Environment=HTTP_PROXY=http://X.X.X.X:8080/ HTTPS_PROXY=http://Y.Y.Y.Y:8080/
+7.2) systemctl status docker
+  docker.service - Docker Application Container Engine
+   Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled; vendor preset: disabled)
+   Drop-In: /etc/systemd/system/docker.service.d
+           +-docker-sysconfig.conf, http-proxy.conf
+     Active: active (running) since Mon 2018-11-12 00:26:56 EST; 1h 20min ago
+ Docs: https://docs.docker.com
+ Main PID: 20249 (dockerd)
+ Memory: 73.5M
+ CGroup: /system.slice/docker.service
+           +-20249 /usr/bin/dockerd --selinux-enabled --storage-driver devicemapper --storage-opt dm.basesize=25G
+           +-20260 docker-containerd --config /var/run/docker/containerd/containerd.toml
+
+Nov 12 00:59:08 sukhoi dockerd[20249]: time="2018-11-12T00:59:08.003626658-05:00" level=info msg="NetworkDB stats  sukhoi (f512c7cd0519...tMsg/s:0"
+Nov 12 01:04:08 sukhoi dockerd[20249]: time="2018-11-12T01:04:08.203598640-05:00" level=info msg="NetworkDB stats  sukhoi (f512c7cd0519...tMsg/s:0"
+Nov 12 01:09:08 sukhoi dockerd[20249]: time="2018-11-12T01:09:08.403655398-05:00" level=info msg="NetworkDB stats  sukhoi (f512c7cd0519...tMsg/s:0"
+Nov 12 01:14:08 sukhoi dockerd[20249]: time="2018-11-12T01:14:08.603535523-05:00" level=info msg="NetworkDB stats  sukhoi (f512c7cd0519...tMsg/s:0"
+Nov 12 01:19:08 sukhoi dockerd[20249]: time="2018-11-12T01:19:08.603644944-05:00" level=info msg="NetworkDB stats  sukhoi (f512c7cd0519...tMsg/s:0"
+Nov 12 01:24:08 sukhoi dockerd[20249]: time="2018-11-12T01:24:08.803625057-05:00" level=info msg="NetworkDB stats  sukhoi (f512c7cd0519...tMsg/s:0"
+Nov 12 01:29:09 sukhoi dockerd[20249]: time="2018-11-12T01:29:09.003692469-05:00" level=info msg="NetworkDB stats  sukhoi (f512c7cd0519...tMsg/s:0"
+Nov 12 01:34:09 sukhoi dockerd[20249]: time="2018-11-12T01:34:09.203640712-05:00" level=info msg="NetworkDB stats  sukhoi (f512c7cd0519...tMsg/s:0"
+Nov 12 01:39:09 sukhoi dockerd[20249]: time="2018-11-12T01:39:09.403656758-05:00" level=info msg="NetworkDB stats  sukhoi  (f512c7cd0519...tMsg/s:0"
+Nov 12 01:44:09 sukhoi dockerd[20249]: time="2018-11-12T01:44:09.603580926-05:00" level=info msg="NetworkDB stats  sukhoi  (f512c7cd0519...tMsg/s:0"
+
+Hint: Some lines were ellipsized, use -l to show in full.
+
+7.4 ) docker info,  Once the docker is installed
+
+ Containers: 0
+ Running: 0
+ Paused: 0
+ Stopped: 0
+Images: 0
+Server Version: 18.03.1-ol
+Storage Driver: devicemapper
+ Pool Name: docker-8:2-4831-pool
+ Pool Blocksize: 65.54kB
+ Base Device Size: 26.84GB
+ Backing Filesystem: xfs
+ Udev Sync Supported: true
+ Data file: /dev/loop0
+ Metadata file: /dev/loop1
+ Data loop file: /var/lib/docker/devicemapper/devicemapper/data
+ Metadata loop file: /var/lib/docker/devicemapper/devicemapper/metadata
+ Data Space Used: 14.42MB
+ Data Space Total: 107.4GB
+ Data Space Available: 107.4GB
+ Metadata Space Used: 581.6kB
+ Metadata Space Total: 2.147GB
+ Metadata Space Available: 2.147GB
+ Thin Pool Minimum Free Space: 10.74GB
+ Deferred Removal Enabled: true
+ Deferred Deletion Enabled: true
+ Deferred Deleted Device Count: 0
+ Library Version: 1.02.149-RHEL7 (2018-07-20)
+Logging Driver: json-file
+Cgroup Driver: cgroupfs
+Plugins:
+ Volume: local
+ Network: bridge host macvlan null overlay
+ Log: awslogs fluentd gcplogs gelf journald json-file logentries splunk syslog
+Swarm: active
+ NodeID: zcbc4vv5757m20385cz7jqxpu
+ Is Manager: true
+ ClusterID: 1s6r7l37c7bzlvkh6ovthf4tr
+ Managers: 1
+ Nodes: 1
+ Orchestration:
+  Task History Retention Limit: 5
+ Raft:
+  Snapshot Interval: 10000
+  Number of Old Snapshots to Retain: 0
+  Heartbeat Tick: 1
+  Election Tick: 10
+ Dispatcher:
+  Heartbeat Period: 5 seconds
+ CA Configuration:
+  Expiry Duration: 3 months
+  Force Rotate: 0
+ Autolock Managers: false
+ Root Rotation In Progress: false
+ Node Address: x.x.x.x
+Runtimes: runc
+Default Runtime: runc
+Init Binary: docker-init
+containerd version: 773c489c9c1b21a6d78b5c538cd395416ec50f88
+runc version: 4fc53a81fb7c994640722ac585fa9ca548971871
+init version: 949e6fa
+Security Options:
+ seccomp
+  Profile: default
+Kernel Version: 3.10.0-327.el7.x86_64
+Operating System: Oracle Linux Server 7.2
+OSType: linux
+Architecture: x86_64
+CPUs: 24
+Total Memory: 125.7GiB
+Name: sukhoi
+ID: ZOOZ:24F2:FWUS:OBQ4:DBRU:5YCU:G364:EMQQ:EUZ7:2VGH:4L2W:DPJB
+Docker Root Dir: /var/lib/docker
+Debug Mode (client): false
+Debug Mode (server): false
+HTTP Proxy: http://x.x.x.x:80/
+HTTPS Proxy: http://x.x.x.x:80/"
+Registry: https://index.docker.io/v1/
+Labels:
+Experimental: false
+Insecure Registries:
+ 127.0.0.0/8
+Live Restore Enabled: false
+
+8) Once we install the docker  ( Default networks)
+
+[root@x4270akash]# docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+29d3ba90ff4c        bridge              bridge              local
+8e955dd25905        host                host                local
+63ac0e5cf0e7        none                null                local
+
+
+9) Once the docker swarm init comamnd issue it will create two networks overly/ingress/docker_gwbridge ( Following network are used for inter communication) 
+
+NETWORK ID          NAME                DRIVER              SCOPE
+fb31d601ef35        bridge              bridge              local
+07501da8723e        docker_gwbridge     bridge              local =======================> 
+a36af19fa85b        host                host                local
+tf6dmepnxekf        ingress             overlay             swarm =======================> 
+37ca581e5d57        none                null                local
+
+
+Swarm initialized: current node (dfmvr0p41u2xaroxju772ea8f) is now a manager.
+
+8) From the client you can add the  worker to this swarm, run the following command:
+
+docker swarm join --token SWMTKN-1-3pgpsq9agfxbsy2asvjew2p30afm8rdfw5szlh9zcb3c5u8aps-20dz136qydn4n05rkpfe592o0 x.x.x.x:2377
+
+9) To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+
+[root@sukhoi  /]# docker node ls
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+v0c5jzt313g58jn5hhl5bxfl2     akash               Ready               Active                                  18.03.1-ol
+dfmvr0p41u2xaroxju772ea8f *   sukhoi              Ready               Active              Leader              18.03.1-ol
+sit20yl9qgftlc6r8vie62nax     lca                 Ready               Active                                  18.03.1-ol
+
+
+Note: Deocker swarm commands only work from the manager.
+
+[root@sukhoi /]# docker info From the manager node 
+Containers: 0
+ Running: 0
+ Paused: 0
+ Stopped: 0
+Images: 0
+Server Version: 18.03.1-ol
+Storage Driver: devicemapper
+ Pool Name: docker-8:2-2148748183-pool
+ Pool Blocksize: 65.54kB
+ Base Device Size: 26.84GB
+ Backing Filesystem: xfs
+ Udev Sync Supported: true
+ Data file: /dev/loop0
+ Metadata file: /dev/loop1
+ Data loop file: /var/lib/docker/devicemapper/devicemapper/data
+ Metadata loop file: /var/lib/docker/devicemapper/devicemapper/metadata
+ Data Space Used: 14.35MB
+ Data Space Total: 107.4GB
+ Data Space Available: 107.4GB
+ Metadata Space Used: 17.36MB
+ Metadata Space Total: 2.147GB
+ Metadata Space Available: 2.13GB
+ Thin Pool Minimum Free Space: 10.74GB
+ Deferred Removal Enabled: true
+ Deferred Deletion Enabled: true
+ Deferred Deleted Device Count: 0
+ Library Version: 1.02.149-RHEL7 (2018-07-20)
+Logging Driver: json-file
+Cgroup Driver: cgroupfs
+Plugins:
+ Volume: local
+ Network: bridge host macvlan null overlay
+ Log: awslogs fluentd gcplogs gelf journald json-file logentries splunk syslog
+Swarm: active
+ NodeID: dfmvr0p41u2xaroxju772ea8f
+ Is Manager: true
+ ClusterID: q2lp94b3oe1a0q6ee3y8y8pv6
+ Managers: 1 ===============================================>
+ Nodes: 4    ===============================================>
+ Orchestration:
+  Task History Retention Limit: 5
+ Raft:
+  Snapshot Interval: 10000
+  Number of Old Snapshots to Retain: 0
+  Heartbeat Tick: 1
+  Election Tick: 10
+ Dispatcher:
+  Heartbeat Period: 5 seconds
+ CA Configuration:
+  Expiry Duration: 3 months
+  Force Rotate: 0
+ Autolock Managers: false
+ Root Rotation In Progress: false
+ Node Address: x.x.x.x
+ Manager Addresses:
+  x.s.x.x:2377
+Runtimes: runc
+Default Runtime: runc
+Init Binary: docker-init
+containerd version: 773c489c9c1b21a6d78b5c538cd395416ec50f88
+runc version: 4fc53a81fb7c994640722ac585fa9ca548971871
+init version: 949e6fa
+Security Options:
+ seccomp
+  Profile: default
+Kernel Version: 3.10.0-957.el7.x86_64
+Operating System: Oracle Linux Server 7.6
+OSType: linux
+Architecture: x86_64
+CPUs: 32
+Total Memory: 251.7GiB
+Name: sukhoi
+ID: DFC4:HDQE:RT3W:LZ7K:FZUT:Z7FD:I36D:IV7F:5U6C:QALR:ISZP:L2V2
+Docker Root Dir: /var/lib/docker
+Debug Mode (client): false
+Debug Mode (server): false
+HTTP Proxy: http://x.x.x.x:80/
+HTTPS Proxy: http://x.x.x.x:80/"
+Registry: https://index.docker.io/v1/
+Labels:
+Experimental: false
+Insecure Registries:
+ 127.0.0.0/8
+
+
+Regards
+Gurudatta N.R
