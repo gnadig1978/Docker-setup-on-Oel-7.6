@@ -201,7 +201,7 @@ Plugins:
  Volume: local
  Network: bridge host macvlan null overlay
  Log: awslogs fluentd gcplogs gelf journald json-file logentries splunk syslog
-Swarm: active
+Swarm: inactive
  NodeID: dfmvr0p41u2xaroxju772ea8f
  Is Manager: true
  ClusterID: q2lp94b3oe1a0q6ee3y8y8pv6
