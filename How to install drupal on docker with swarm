@@ -1,0 +1,62 @@
+How to install drupal on docker with swarm 
+
+1) login to docker ( manager node) and create a overlay network for mydrupal
+
+docker network create --driver overlay mydrupal (Drupal for Web Content Management)
+
+Note: Manager uses RAFT (Consensus Algorithm/Database data which consits of all the database )
+
+API                 =======================> Accepts the command from the Clients and create the service object
+Orchestrator  =======================> Reconcillation loop for the service objects and creates the tasks
+Allocater        =======================> Allocates the Ipaddress to the tasks 
+Sheduler       =======================> Assigns nodes to tasks
+Dispatcher     =======================> checks in on the works 
+
+Worker node 
+
+Worker        ========================> connects to dispather to check on the assigned tasks 
+Executer      ========================> Executes the tasks assigned to worker node. 
+
+[root@sukhoi /]# docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+fb31d601ef35        bridge              bridge              local
+07501da8723e        docker_gwbridge     bridge              local
+a36af19fa85b        host                host                local
+tf6dmepnxekf        ingress             overlay             swarm
+wk6guya6sljb        mydrupal            overlay             swarm ==============================> following network will be created. 
+37ca581e5d57        none                null                local
+
+2) Create a service for psql ( psql)  it will take couple of min to pull the image from the repositary . 
+
+docker service create --name psql --network mydrupal -e POSTGRES_PASSWORD=JimCarry postgres
+
+3) Once the image pulled verify the same 
+
+[root@sukhoi /]# docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+8q1njxxbsea7        psql                replicated          1/1                 postgres:latest
+
+[root@sukhoi/]# docker service ps psql
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE           ERROR               PORTS
+co8wisdvpdr1        psql.1              postgres:latest     sukhoi               Running             Running 2 minutes ago
+
+4) Create a service to use the drupal to use the network mydrupal. ( it may take couple of min)
+
+docker service create --name drupal --network mydrupal -p 80:80 drupal
+
+5) Issue the command to check the status of the services 
+
+docker service ps drupal
+
+watch docker service ls
+
+docker service inspect drupal =====================> Inspect 
+
+Once you install you can try to get in the GUI 
+
+open the browser and http://x.x.x.x:80 ==================> your server ip and ans ( key in the information)
+
+
+Regards
+Gurudatta  N.R
+
