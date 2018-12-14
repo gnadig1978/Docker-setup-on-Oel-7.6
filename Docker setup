@@ -140,7 +140,7 @@ NETWORK ID          NAME                DRIVER              SCOPE
 63ac0e5cf0e7        none                null                local
 
 
-9) Once the docker swarm init comamnd issue it will create two networks overly/ingress/docker_gwbridge ( Following network are used for inter communication) 
+9) Once the docker swarm init command issue it will create two networks overly/ingress/docker_gwbridge ( Following network are used for inter communication) 
 
 NETWORK ID          NAME                DRIVER              SCOPE
 fb31d601ef35        bridge              bridge              local
